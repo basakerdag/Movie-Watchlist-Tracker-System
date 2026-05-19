@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTrack - Movie Watchlist Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a; /* Deep cinematic dark background */
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+        }
+        .navbar {
+            background-color: #1e293b !important;
+            border-bottom: 2px solid #334155;
+        }
+        .brand-logo {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(45deg, #e11d48, #f43f5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .form-control, .form-select {
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            color: #f1f5f9;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #0f172a;
+            border-color: #f43f5e;
+            color: #f1f5f9;
+            box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            border: none;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+        }
+        .table {
+            color: #e2e8f0;
+        }
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: rgba(0, 0, 0, 0);
+        }
+        .badge-watched {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid #10b981;
+        }
+        .badge-towatch {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid #f59e0b;
+        }
+        .rating-stars {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark mb-5 py-3">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 brand-logo">🎬 CineTrack</span>
+            <span class="text-muted small">Watchlist Management System</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card p-4">
+                    <h5 class="fw-bold mb-4 text-white">Add Movie Tracker</h5>
+                    <form id="movieForm">
+                        <div class="mb-3">
+                            <label for="title" class="form-label text-secondary small fw-semibold">Movie Title *</label>
+                            <input type="text" class="form-control form-control-lg" id="title" placeholder="e.g. Interstellar" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="director" class="form-label text-secondary small fw-semibold">Director</label>
+                            <input type="text" class="form-control" id="director" placeholder="e.g. Christopher Nolan">
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label for="releaseYear" class="form-label text-secondary small fw-semibold">Release Year</label>
+                                <input type="number" class="form-control" id="releaseYear" min="1888" max="2026" placeholder="2014">
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label for="category" class="form-label text-secondary small fw-semibold">Category</label>
+                                <select class="form-select" id="category">
+                                    <option value="1">Action</option>
+                                    <option value="2">Drama</option>
+                                    <option value="3">Sci-Fi</option>
+                                    <option value="4">Comedy</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="status" class="form-label text-secondary small fw-semibold">Watch Status *</label>
+                            <select class="form-select form-select-lg" id="status">
+                                <option value="To Watch">To Watch</option>
+                                <option value="Watched">Watched</option>
+                            </select>
+                        </div>
+                        
+                        <div id="watchedFields" style="display: none;" class="p-3 mb-3 border border-secondary rounded bg-dark-opacity">
+                            <div class="mb-3">
+                                <label for="rating" class="form-label text-secondary small fw-semibold">Your Rating (1-5)</label>
+                                <input type="number" class="form-control" id="rating" min="1" max="5" placeholder="⭐ 5">
+                            </div>
+                            <div class="mb-2">
+                                <label for="personalNote" class="form-label text-secondary small fw-semibold">Personal Thoughts</label>
+                                <textarea class="form-control" id="personalNote" rows="2" placeholder="Write a quick review..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Save Movie</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold m-0 text-white">Cinema Catalog</h5>
+                        <span class="badge bg-dark text-secondary border border-secondary py-2 px-3">Live Connection</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover m-0">
+                            <thead>
+                                <tr class="text-secondary small uppercase border-secondary">
+                                    <th>Title</th>
+                                    <th>Director</th>
+                                    <th>Year</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Rating</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movieTableBody" class="border-0">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

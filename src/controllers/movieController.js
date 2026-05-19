@@ -18,7 +18,17 @@ const MovieController = {
             if (err) return res.status(400).json({ success: false, message: err.message });
             res.status(200).json({ success: true, message: 'Movie deleted successfully.' });
         });
+    },
+    updateMovie: (req, res) => {
+        const movieId = req.params.id;
+        const movieData = req.body;
+
+        MovieService.validateAndUpdateMovie(movieId, movieData, (err) => {
+            if (err) return res.status(400).json({ success: false, message: err.message });
+            res.status(200).json({ success: true, message: 'Movie updated successfully.' });
+        });
     }
+
 };
 
 module.exports = MovieController;
