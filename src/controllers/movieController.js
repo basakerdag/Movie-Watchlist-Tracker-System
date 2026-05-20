@@ -27,8 +27,24 @@ const MovieController = {
             if (err) return res.status(400).json({ success: false, message: err.message });
             res.status(200).json({ success: true, message: 'Movie updated successfully.' });
         });
-    }
+    }, 
+    searchMovies: (req, res) => {
+        const { title, categoryId } = req.query; 
 
+        MovieService.searchMovies(title, categoryId, (err, movies) => {
+            if (err) return res.status(500).json({ success: false, message: err.message });
+            res.status(200).json({ success: true, data: movies });
+        });
+    },
+    toggleStatus: (req, res) => {
+        const movieId = req.params.id;
+        const { currentStatus, rating, personal_note } = req.body;
+
+        MovieService.toggleMovieStatus(movieId, currentStatus, { rating, personal_note }, (err) => {
+            if (err) return res.status(400).json({ success: false, message: err.message });
+            res.status(200).json({ success: true, message: 'Watch status toggled smoothly.' });
+        });
+    }
 };
 
 module.exports = MovieController;

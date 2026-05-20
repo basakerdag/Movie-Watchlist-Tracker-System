@@ -1,0 +1,89 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CineTrack - Movie Watchlist Tracker API",
+    "version": "1.0.0",
+    "description": "Interactive RESTful API documentation developed for the System Analysis and Design course project."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/api/movies": {
+      "get": {
+        "summary": "Get all movies",
+        "description": "Retrieves a list of all movies in the database, including their category names.",
+        "responses": {
+          "200": { "description": "Successful retrieval of watchlist records." }
+        }
+      },
+      "post": {
+        "summary": "Add a new movie",
+        "description": "Validates input constraints and inserts a movie into the database tracker.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "status"],
+                "properties": {
+                  "title": { "type": "string", "example": "Inception" },
+                  "director": { "type": "string", "example": "Christopher Nolan" },
+                  "release_year": { "type": "integer", "example": 2010 },
+                  "status": { "type": "string", "example": "Watched" },
+                  "rating": { "type": "integer", "example": 5 },
+                  "personal_note": { "type": "string", "example": "Mind-bending masterpiece." },
+                  "category_id": { "type": "integer", "example": 3 }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Movie tracked successfully." },
+          "400": { "description": "Bad Request - Validation or business rule boundary failure." }
+        }
+      }
+    },
+    "/api/movies/search": {
+      "get": {
+        "summary": "Search and filter movies",
+        "description": "Filters watchlist data by live title query string parameters and category matching constraints.",
+        "parameters": [
+          { "name": "title", "in": "query", "schema": { "type": "string" }, "description": "Partial search string match" },
+          { "name": "categoryId", "in": "query", "schema": { "type": "string" }, "description": "Specific category ID filter" }
+        ],
+        "responses": {
+          "200": { "description": "Filtered array dataset returned successfully." }
+        }
+      }
+    },
+    "/api/movies/{id}": {
+      "put": {
+        "summary": "Update an existing movie",
+        "description": "Applies business logic and safely overwrites an active tracker record by ID.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object" } } }
+        },
+        "responses": {
+          "200": { "description": "Record mutated successfully." },
+          "400": { "description": "Business validation constraints violated." }
+        }
+      },
+      "delete": {
+        "summary": "Remove a movie record",
+        "description": "Permanently deletes a tracked movie row index from the storage backend using its ID parameters.",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": {
+          "200": { "description": "Movie entry purged successfully." }
+        }
+      }
+    }
+  }
+}

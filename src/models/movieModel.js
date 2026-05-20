@@ -3,61 +3,89 @@ const db = require('../config/database');
 const MovieModel = {
     getAll: (callback) => {
         const query = `
-            SELECT movies.*, categories.name as category_name 
+            SELECT movies.*, categories.name AS category_name 
             FROM movies 
             LEFT JOIN categories ON movies.category_id = categories.id
+            ORDER BY movies.id DESC
         `;
-        db.all(query, [], (err, rows) => callback(err, rows));
+        db.all(query, [], (err, rows) => {
+            callback(err, rows);
+        });
     },
 
     create: (movieData, callback) => {
-        const { title, director, release_year, status, rating, personal_note, category_id } = movieData;
         const query = `
-            INSERT INTO movies (title, director, release_year, status, rating, personal_note, category_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO movies (title, director, release_year, status, rating, personal_note, category_id, runtime, poster_url) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        db.run(query, [title, director, release_year, status, rating, personal_note, category_id], function(err) {
+        const params = [
+            movieData.title,
+            movieData.director,
+            movieData.release_year,
+            movieData.status,
+            movieData.rating,
+            movieData.personal_note,
+            movieData.category_id,
+            movieData.runtime,
+            movieData.poster_url
+        ];
+        db.run(query, params, function (err) {
             callback(err, this ? this.lastID : null);
         });
     },
 
     update: (id, movieData, callback) => {
-        const { title, director, release_year, status, rating, personal_note, category_id } = movieData;
         const query = `
             UPDATE movies 
-            SET title = ?, director = ?, release_year = ?, status = ?, rating = ?, personal_note = ?, category_id = ?
+            SET title = ?, director = ?, release_year = ?, status = ?, rating = ?, personal_note = ?, category_id = ?, runtime = ?, poster_url = ?
             WHERE id = ?
         `;
-        db.run(query, [title, director, release_year, status, rating, personal_note, category_id, id], (err) => {
+        const params = [
+            movieData.title,
+            movieData.director,
+            movieData.release_year,
+            movieData.status,
+            movieData.rating,
+            movieData.personal_note,
+            movieData.category_id,
+            movieData.runtime,
+            movieData.poster_url,
+            id
+        ];
+        db.run(query, params, function (err) {
             callback(err);
         });
     },
 
     delete: (id, callback) => {
-        const query = 'DELETE FROM movies WHERE id = ?';
-        db.run(query, [id], (err) => callback(err));
+        db.run(`DELETE FROM movies WHERE id = ?`, [id], (err) => {
+            callback(err);
+        });
     },
 
-    search: (searchQuery, categoryId, callback) => {
-        let sql = `
-            SELECT movies.*, categories.name as category_name 
+    search: (title, categoryId, callback) => {
+        let query = `
+            SELECT movies.*, categories.name AS category_name 
             FROM movies 
             LEFT JOIN categories ON movies.category_id = categories.id
             WHERE 1=1
         `;
         const params = [];
 
-        if (searchQuery && searchQuery.trim() !== '') {
-            sql += ` AND movies.title LIKE ?`;
-            params.push(`%${searchQuery}%`);
+        if (title) {
+            query += ` AND movies.title LIKE ?`;
+            params.push(`%${title}%`);
         }
-
-        if (categoryId && categoryId !== 'all') {
-            sql += ` AND movies.category_id = ?`;
+        if (categoryId) {
+            query += ` AND movies.category_id = ?`;
             params.push(categoryId);
         }
 
-        db.all(sql, params, (err, rows) => callback(err, rows));
+        query += ` ORDER BY movies.id DESC`;
+
+        db.all(query, params, (err, rows) => {
+            callback(err, rows);
+        });
     }
 };
 

@@ -17,7 +17,7 @@ db.serialize(() => {
             name TEXT NOT NULL UNIQUE
         )
     `);
-
+    
     db.run(`
         CREATE TABLE IF NOT EXISTS movies (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,13 +28,17 @@ db.serialize(() => {
             rating INTEGER CHECK(rating >= 1 AND rating <= 5),
             personal_note TEXT,
             category_id INTEGER,
+            runtime INTEGER,
+            poster_url TEXT,
             FOREIGN KEY (category_id) REFERENCES categories(id)
         )
     `);
 
-    const stmt = db.prepare("INSERT OR IGNORE INTO categories (name) VALUES (?)");
-    ['Action', 'Drama', 'Sci-Fi', 'Comedy'].forEach(cat => stmt.run(cat));
-    stmt.finalize();
+    const defaultCategories = ['Action', 'Drama', 'Sci-Fi', 'Comedy'];
+    defaultCategories.forEach((cat, index) => {
+        const forcedId = index + 1;
+        db.run(`INSERT OR IGNORE INTO categories (id, name) VALUES (?, ?)`, [forcedId, cat]);
+    });
 });
 
 module.exports = db;
