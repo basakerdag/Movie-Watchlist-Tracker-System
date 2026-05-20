@@ -46,8 +46,8 @@ const MovieService = {
         MovieModel.delete(id, callback);
     },
 
-    searchMovies: (title, categoryId, callback) => {
-        MovieModel.search(title, categoryId, callback);
+    searchMovies: (title, categoryId, status, callback) => {
+        MovieModel.search(title, categoryId, status,callback);
     },
     toggleMovieStatus: (id, currentStatus, additionalData, callback) => {
         if (!id) return callback(new Error('Invalid movie ID.'));

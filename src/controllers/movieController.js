@@ -29,9 +29,9 @@ const MovieController = {
         });
     }, 
     searchMovies: (req, res) => {
-        const { title, categoryId } = req.query; 
+        const { title, categoryId, status } = req.query; 
 
-        MovieService.searchMovies(title, categoryId, (err, movies) => {
+        MovieService.searchMovies(title, categoryId, status, (err, movies) => {
             if (err) return res.status(500).json({ success: false, message: err.message });
             res.status(200).json({ success: true, data: movies });
         });

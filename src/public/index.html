@@ -38,7 +38,18 @@
         }
         .metric-card {
             background: linear-gradient(145deg, #1f242c, #161b22);
-            border-left: 4px solid #58a6ff;
+            border-left: 4px solid #17a2b8;
+        }
+        .analysis-card {
+            background: linear-gradient(145deg, #1c2128, #161b22);
+            border: 1px dashed #444c56;
+            display: none; 
+        }
+        .clickable-row {
+            cursor: pointer;
+        }
+        .clickable-row:hover {
+            background-color: #21262d !important;
         }
     </style>
 </head>
@@ -47,29 +58,20 @@
     <nav class="navbar navbar-dark bg-dark border-bottom border-secondary mb-4">
         <div class="container">
             <a class="navbar-brand fw-bold text-info" href="#">🎬 CineTrack Dashboard</a>
-            <span class="text-muted d-none d-sm-inline">System Analysis & Design Project</span>
+            <span class="text-muted d-none d-sm-inline">project</span>
         </div>
     </nav>
 
     <div class="container mb-5">
         
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card p-3 metric-card">
-                    <small class="text-muted text-uppercase fw-bold">Total Movies</small>
-                    <h3 class="m-0 fw-bold text-white" id="statTotal">0</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 metric-card" style="border-left-color: #238636;">
-                    <small class="text-muted text-uppercase fw-bold">Total Watch Time</small>
-                    <h3 class="m-0 fw-bold text-white" id="statRuntime">0 Min</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 metric-card" style="border-left-color: #ffc107;">
-                    <small class="text-muted text-uppercase fw-bold">Average Rating</small>
-                    <h3 class="m-0 fw-bold text-white" id="statRating">0 / 5</h3>
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card p-4 metric-card">
+                    <small class="text-info text-uppercase fw-bold tracking-wider">Dynamic Catalog Distribution Analytics</small>
+                    <h2 class="fw-bold text-white mt-1 mb-3" id="statTotal">0 Movies Registered</h2>
+                    
+                    <div id="statCategories" class="d-flex flex-wrap gap-2 pt-2 border-top border-secondary">
+                        </div>
                 </div>
             </div>
         </div>
@@ -96,7 +98,7 @@
                         <div class="row g-2 mb-3">
                             <div class="col-6">
                                 <label for="category" class="form-label text-light small">Category *</label>
-                                <select id="category" class="form-select" default="1">
+                                <select id="category" class="form-select">
                                     <option value="1">Action</option>
                                     <option value="2">Drama</option>
                                     <option value="3">Sci-Fi</option>
@@ -135,18 +137,46 @@
             </div>
 
             <div class="col-lg-8">
+                
+                <div class="card p-4 mb-4 shadow-sm analysis-card" id="analysisPanel">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
+                            <img src="" id="analysisPoster" class="img-fluid rounded border border-secondary" style="max-height: 120px; object-fit: cover;" alt="Afiş">
+                        </div>
+                        <div class="col-md-10">
+                            <span class="badge bg-info text-dark mb-1">Active Selection Insights</span>
+                            <h4 class="text-white fw-bold m-0" id="analysisTitle">Movie Title</h4>
+                            <div class="my-2">
+                                <span class="text-muted me-3" id="analysisMeta">Director & Year</span>
+                                <span class="rating-stars" id="analysisStars"></span>
+                            </div>
+                            <div class="p-3 rounded border border-secondary bg-dark mt-2">
+                                <small class="text-warning d-block fw-bold text-uppercase mb-1" style="font-size: 0.75rem;">Your Personal Review & Note</small>
+                                <p class="m-0 text-light small" id="analysisNote">No personal notes added for this record.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card p-4 shadow-sm">
                     <div class="row g-2 mb-4 border-bottom border-secondary pb-3">
-                        <div class="col-md-7">
+                        <div class="col-md-6">
                             <input type="text" id="searchInput" class="form-control" placeholder="Search movies dynamically by title string...">
                         </div>
-                        <div class="col-md-5">
+                        <div class="col-md-3">
                             <select id="filterCategory" class="form-select">
                                 <option value="">All Categories</option>
                                 <option value="1">Action</option>
                                 <option value="2">Drama</option>
                                 <option value="3">Sci-Fi</option>
                                 <option value="4">Comedy</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filterStatus" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="To Watch">To Watch</option>
+                                <option value="Watched">Watched</option>
                             </select>
                         </div>
                     </div>
@@ -166,7 +196,7 @@
                                 </tr>
                             </thead>
                             <tbody id="movieTableBody">
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </div>

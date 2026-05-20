@@ -6,8 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusSelect = document.getElementById('status');
     const watchedFields = document.getElementById('watchedFields');
     const movieTableBody = document.getElementById('movieTableBody');
-    const ratingInput = document.getElementById('rating');
-    
+    const ratingInput = document.getElementById('rating');    
+    const analysisPanel = document.getElementById('analysisPanel');
+    const analysisTitle = document.getElementById('analysisTitle');
+    const analysisMeta = document.getElementById('analysisMeta');
+    const analysisStars = document.getElementById('analysisStars');
+    const analysisNote = document.getElementById('analysisNote');
+    const analysisPoster = document.getElementById('analysisPoster');
+
     let editingMovieId = null; 
 
     const defaultPoster = "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop";
@@ -25,23 +31,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateDashboardMetrics = (movies) => {
         const totalMovies = movies.length;
-        let totalRuntime = 0;
-        let ratedMoviesCount = 0;
-        let totalRatingSum = 0;
+        document.getElementById('statTotal').textContent = `${totalMovies} Movies Registered`;
 
-        movies.forEach(m => {
-            if (m.runtime) totalRuntime += parseInt(m.runtime);
-            if (m.status === 'Watched' && m.rating) {
-                ratedMoviesCount++;
-                totalRatingSum += parseInt(m.rating);
+        const statCategoriesContainer = document.getElementById('statCategories');
+        if (statCategoriesContainer) {
+            statCategoriesContainer.innerHTML = ''; // Eski badge'leri temizle
+
+            if (totalMovies === 0) {
+                statCategoriesContainer.innerHTML = `<span class="badge bg-dark text-muted border border-secondary px-3 py-2">No genres available in the current subset.</span>`;
+                return;
             }
-        });
 
-        const avgRating = ratedMoviesCount > 0 ? (totalRatingSum / ratedMoviesCount).toFixed(1) : "0.0";
+            const categoryCounts = {};
+            movies.forEach(m => {
+                const catName = m.category_name || 'General';
+                categoryCounts[catName] = (categoryCounts[catName] || 0) + 1;
+            });
 
-        document.getElementById('statTotal').textContent = totalMovies;
-        document.getElementById('statRuntime').textContent = `${totalRuntime} Min`;
-        document.getElementById('statRating').textContent = `${avgRating} / 5 ⭐`;
+            Object.entries(categoryCounts).forEach(([name, count]) => {
+                const badge = document.createElement('span');
+                badge.className = "badge bg-dark text-info border border-info px-3 py-2 fs-6 fw-semibold";
+                badge.innerHTML = `🎬 ${name}: <span class="text-white fw-bold ms-1">${count}</span>`;
+                statCategoriesContainer.appendChild(badge);
+            });
+        }
     };
 
     const renderTableRows = (movies) => {
@@ -55,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         movies.forEach(movie => {
             const row = document.createElement('tr');
-            row.className = "border-secondary text-white align-middle";
+            row.className = "border-secondary text-white align-middle clickable-row";
             
             const currentStatus = movie.status || 'To Watch';
             const statusClass = (currentStatus.toLowerCase().includes('watch')) ? 'badge-towatch' : 'badge-watched';
@@ -65,13 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <img src="${displayPoster}" class="movie-poster" alt="Poster" onerror="this.src='${defaultPoster}'">
                 </td>
-                <td>
-                    <span class="text-white fw-semibold d-block">${movie.title}</span>
-                    ${movie.runtime ? `<small class="text-muted">${movie.runtime} min</small>` : ''}
-                </td>
-                <td>${movie.director || '<span class="text-muted">-</span>'}</td>
-                <td>${movie.release_year || '<span class="text-muted">-</span>'}</td>
-                <td><span class="badge bg-secondary text-light opacity-75">${movie.category_name || 'General'}</span></td>
+                <td class="fw-semibold text-info-hover row-trigger">${movie.title}</td>
+                <td class="row-trigger">${movie.director || '<span class="text-muted">-</span>'}</td>
+                <td class="row-trigger">${movie.release_year || '<span class="text-muted">-</span>'}</td>
+                <td class="row-trigger"><span class="badge bg-secondary text-light opacity-75">${movie.category_name || 'General'}</span></td>
                 <td>
                     <span class="badge ${statusClass} status-toggle-btn" 
                           style="cursor: pointer;" 
@@ -81,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${currentStatus} 🎬
                     </span>
                 </td>
-                <td class="rating-stars">${movie.rating ? '★'.repeat(movie.rating) : '<span class="text-muted">-</span>'}</td>
+                <td class="rating-stars row-trigger">${movie.rating ? '★'.repeat(movie.rating) : '<span class="text-muted">-</span>'}</td>
                 <td class="text-end">
                     <button class="btn btn-sm btn-outline-info me-1 px-2 edit-btn" 
                             data-id="${movie.id}" 
@@ -97,15 +107,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn btn-sm btn-outline-danger px-2 delete-btn" data-id="${movie.id}">Remove</button>
                 </td>
             `;
+
+            row.querySelectorAll('.row-trigger').forEach(cell => {
+                cell.addEventListener('click', () => {
+                    analysisPanel.style.display = 'block';
+                    analysisTitle.textContent = movie.title;
+                    analysisMeta.textContent = `Directed by ${movie.director || 'Unknown'} • Year: ${movie.release_year || 'N/A'} • Runtime: ${movie.runtime ? movie.runtime + ' Min' : 'N/A'}`;
+                    analysisPoster.src = displayPoster;
+                    
+                    analysisStars.textContent = movie.rating ? '★'.repeat(movie.rating) : 'Unrated 🎬';
+                    
+                    analysisNote.textContent = movie.personal_note && movie.personal_note.trim() !== '' 
+                        ? movie.personal_note 
+                        : "No analysis thoughts or review notes recorded for this single entry.";
+                    
+                    analysisPanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                });
+            });
+
             movieTableBody.appendChild(row);
         });
 
         movieTableBody.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', deleteMovie));
         movieTableBody.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', startEditMode));
 
-        // 🔥 GÜVENLİ VE PROMPT KULLANMAYAN YENİ SATIR İÇİ DURUM DEĞİŞTİRİCİ
         movieTableBody.querySelectorAll('.status-toggle-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
+                e.stopPropagation(); 
                 const id = e.target.getAttribute('data-id');
                 const currentStatus = e.target.getAttribute('data-status');
                 
@@ -128,7 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const result = await response.json();
                     if (result.success) {
-                        loadMovies(); // Sayfa yenilenmeden verileri ve üst paneli canlı güncelle!
+                        analysisPanel.style.display = 'none'; 
+                        triggerSearch(); 
                     } else {
                         alert("Validation or Database Error: " + result.message);
                     }
@@ -152,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const startEditMode = (e) => {
+        e.stopPropagation(); 
         const btn = e.target;
         editingMovieId = btn.getAttribute('data-id');
 
@@ -210,13 +240,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 actualForm.reset();
                 watchedFields.style.display = 'none';
+                analysisPanel.style.display = 'none'; 
                 
                 editingMovieId = null;
                 formTitle.textContent = "Add Movie Tracker";
                 submitBtn.textContent = "Save Movie";
                 submitBtn.className = "btn btn-primary btn-lg w-100 mt-2";
                 
-                loadMovies(); 
+                triggerSearch(); 
             } else {
                 alert('Validation Error: ' + result.message);
             }
@@ -226,13 +257,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const deleteMovie = async (e) => {
+        e.stopPropagation(); 
         const id = e.target.getAttribute('data-id');
         if (!confirm('Are you sure you want to remove this record permanently?')) return;
 
         try {
             const response = await fetch(`/api/movies/${id}`, { method: 'DELETE' });
             const result = await response.json();
-            if (result.success) loadMovies();
+            if (result.success) {
+                analysisPanel.style.display = 'none'; 
+                triggerSearch();
+            }
         } catch (error) {
             console.error('Delete worker crashed:', error);
         }
@@ -240,13 +275,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById('searchInput');
     const filterCategory = document.getElementById('filterCategory');
+    const filterStatus = document.getElementById('filterStatus');
 
     const triggerSearch = async () => {
         const title = searchInput.value.trim();
         const categoryId = filterCategory.value;
+        const status = filterStatus ? filterStatus.value : '';
 
         try {
-            const response = await fetch(`/api/movies/search?title=${encodeURIComponent(title)}&categoryId=${categoryId}`);
+            const response = await fetch(`/api/movies/search?title=${encodeURIComponent(title)}&categoryId=${categoryId}&status=${encodeURIComponent(status)}`);
             const result = await response.json();
             if (result.success) {
                 renderTableRows(result.data);
@@ -258,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (searchInput) searchInput.addEventListener('input', triggerSearch);
     if (filterCategory) filterCategory.addEventListener('change', triggerSearch);
+    if (filterStatus) filterStatus.addEventListener('change', triggerSearch);
 
     loadMovies();
 });

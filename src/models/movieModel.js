@@ -63,7 +63,7 @@ const MovieModel = {
         });
     },
 
-    search: (title, categoryId, callback) => {
+    search: (title, categoryId, status, callback) => {
         let query = `
             SELECT movies.*, categories.name AS category_name 
             FROM movies 
@@ -79,6 +79,10 @@ const MovieModel = {
         if (categoryId) {
             query += ` AND movies.category_id = ?`;
             params.push(categoryId);
+        }
+        if (status) {
+            query += ` AND movies.status = ?`;
+            params.push(status);
         }
 
         query += ` ORDER BY movies.id DESC`;
