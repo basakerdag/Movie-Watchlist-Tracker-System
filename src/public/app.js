@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const statCategoriesContainer = document.getElementById('statCategories');
         if (statCategoriesContainer) {
-            statCategoriesContainer.innerHTML = ''; // Eski badge'leri temizle
+            statCategoriesContainer.innerHTML = ''; 
 
             if (totalMovies === 0) {
                 statCategoriesContainer.innerHTML = `<span class="badge bg-dark text-muted border border-secondary px-3 py-2">No genres available in the current subset.</span>`;
@@ -102,14 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             data-status="${currentStatus}" 
                             data-rating="${movie.rating || ''}" 
                             data-runtime="${movie.runtime || ''}"
-                            data-poster="${movie.poster_url || ''}"
                             data-note="${movie.personal_note || ''}">Edit</button>
                     <button class="btn btn-sm btn-outline-danger px-2 delete-btn" data-id="${movie.id}">Remove</button>
                 </td>
             `;
 
             row.querySelectorAll('.row-trigger').forEach(cell => {
-                cell.addEventListener('click', () => {
+                cell.addEventListener('click', async () => {
                     analysisPanel.style.display = 'block';
                     analysisTitle.textContent = movie.title;
                     analysisMeta.textContent = `Directed by ${movie.director || 'Unknown'} • Year: ${movie.release_year || 'N/A'} • Runtime: ${movie.runtime ? movie.runtime + ' Min' : 'N/A'}`;
@@ -119,7 +118,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     analysisNote.textContent = movie.personal_note && movie.personal_note.trim() !== '' 
                         ? movie.personal_note 
-                        : "No analysis thoughts or review notes recorded for this single entry.";
+                        : "No personal notes added for this record.";
+                    
+                    // 🌐 HARİCİ OMDb REST API PROXY BAĞLANTI MOTORU
+                    const apiPlot = document.getElementById('apiPlot');
+                    const apiActors = document.getElementById('apiActors');
+                    const apiImdb = document.getElementById('apiImdb');
+                    const apiAwards = document.getElementById('apiAwards');
+
+                    if (apiPlot && apiActors && apiImdb && apiAwards) {
+                        apiPlot.textContent = "Fetching official Hollywood registry data...";
+                        apiActors.textContent = "-";
+                        apiImdb.textContent = "-";
+                        apiAwards.textContent = "-";
+
+                        try {
+                            const response = await fetch(`/api/movies/external-search?title=${encodeURIComponent(movie.title)}`);
+                            const result = await response.json();
+
+                            if (result.success && result.data) {
+                                apiPlot.textContent = result.data.plot;
+                                apiActors.textContent = result.data.actors;
+                                apiImdb.textContent = result.data.imdbRating && result.data.imdbRating !== "N/A" 
+                                    ? `⭐ ${result.data.imdbRating} / 10` 
+                                    : "N/A";
+                                apiAwards.textContent = result.data.awards;
+
+                                // Otomatik Afiş Entegrasyonu: Kullanıcının yerel afiş linki yoksa OMDb afişini basıyoruz
+                                if ((!movie.poster_url || movie.poster_url.trim() === '') && result.data.poster) {
+                                    analysisPoster.src = result.data.poster;
+                                }
+                            } else {
+                                apiPlot.textContent = "Movie details could not be matched with the remote OMDb API database.";
+                            }
+                        } catch (error) {
+                            console.error("External payload extraction failed:", error);
+                            apiPlot.textContent = "Network timeout or proxy API connection lost.";
+                        }
+                    }
                     
                     analysisPanel.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 });
@@ -190,7 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('releaseYear').value = btn.getAttribute('data-year');
         document.getElementById('category').value = btn.getAttribute('data-category');
         document.getElementById('runtime').value = btn.getAttribute('data-runtime');
-        document.getElementById('posterUrl').value = btn.getAttribute('data-poster');
         document.getElementById('status').value = btn.getAttribute('data-status');
         
         if (btn.getAttribute('data-status') === 'Watched') {
@@ -222,7 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
             personal_note: document.getElementById('personalNote').value.trim(),
             category_id: parseInt(document.getElementById('category').value),
             runtime: parseInt(document.getElementById('runtime').value) || null,
-            poster_url: document.getElementById('posterUrl').value.trim()
         };
 
         const url = editingMovieId ? `/api/movies/${editingMovieId}` : '/api/movies';

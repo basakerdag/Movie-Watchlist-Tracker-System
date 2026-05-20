@@ -71,7 +71,7 @@
                     <h2 class="fw-bold text-white mt-1 mb-3" id="statTotal">0 Movies Registered</h2>
                     
                     <div id="statCategories" class="d-flex flex-wrap gap-2 pt-2 border-top border-secondary">
-                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,10 +111,6 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="posterUrl" class="form-label text-light small">Cover Poster Image URL</label>
-                            <input type="url" id="posterUrl" class="form-control" placeholder="https://example.com/poster.jpg">
-                        </div>
-                        <div class="mb-3">
                             <label for="status" class="form-label text-light small">Watch Status *</label>
                             <select id="status" class="form-select">
                                 <option value="To Watch">To Watch</option>
@@ -150,10 +146,34 @@
                                 <span class="text-muted me-3" id="analysisMeta">Director & Year</span>
                                 <span class="rating-stars" id="analysisStars"></span>
                             </div>
+                            
                             <div class="p-3 rounded border border-secondary bg-dark mt-2">
                                 <small class="text-warning d-block fw-bold text-uppercase mb-1" style="font-size: 0.75rem;">Your Personal Review & Note</small>
                                 <p class="m-0 text-light small" id="analysisNote">No personal notes added for this record.</p>
                             </div>
+
+                            <div class="p-3 rounded border border-info bg-dark mt-3">
+                                <small class="text-info d-block fw-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 0.5px;">🌐 Web Integration Data (OMDb API Proxy)</small>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-12">
+                                        <strong class="text-info d-block mb-1 small">Plot Synopsis:</strong> 
+                                        <span id="apiPlot" class="text-white bg-transparent">Selecting movie...</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong class="text-info d-block mb-1 small">Starring Cast:</strong> 
+                                        <span id="apiActors" class="text-white">-</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong class="text-info d-block mb-1 small">Official IMDb Score:</strong> 
+                                        <span class="badge bg-warning text-dark fw-bold fs-6" id="apiImdb">-</span>
+                                    </div>
+                                    <div class="col-12">
+                                        <strong class="text-info d-block mb-1 small">Tracked Awards:</strong> 
+                                        <span id="apiAwards" class="text-white">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -194,7 +214,7 @@
                                     <th>Rating</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
-                            </thead>
+                            </tbody>
                             <tbody id="movieTableBody">
                             </tbody>
                         </table>
